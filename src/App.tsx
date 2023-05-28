@@ -2,49 +2,28 @@ import {
   ChangeEventHandler,
   MouseEventHandler,
   SyntheticEvent,
-  useRef,
   useState,
   useMemo,
-  useEffect,
   useCallback,
 } from "react";
-import {
-  BoxEraser,
-  CircleEraser,
-  ConnectedEraser,
-  displayImageOnCanvas,
-  getX,
-  getY,
-} from "./lib";
-import { Coordinates } from "./lib/types";
+import { BoxEraser, CircleEraser, ConnectedEraser, getX, getY } from "./lib";
 import { useCanvas } from "./lib/hooks";
 
 const App = () => {
   const [uploaded, setUploaded] = useState(false);
-  const [coor, setCoor] = useState<Coordinates>({ x: 0, y: 0 });
   const [threshold, setThreshold] = useState<number>(25);
   const [size, setSize] = useState<number>(10);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMouseTap, setIsMouseTap] = useState(false);
   const [selectedEraserIndex, setSelectedEraserIndex] = useState(0);
 
-  const { canvasRef, history, init, save, undo, redo } = useCanvas();
+  const { canvasRef, init, save, undo, redo } = useCanvas();
 
   const canvas = canvasRef.current;
 
   const erasers = useMemo(() => [ConnectedEraser, CircleEraser, BoxEraser], []);
 
   const Eraser = erasers[selectedEraserIndex];
-
-  const eraser = useMemo(
-    () =>
-      new erasers[selectedEraserIndex](coor.x, coor.y, {
-        threshold,
-        size,
-        radius: size,
-      }),
-    [erasers, selectedEraserIndex, coor.x, coor.y, threshold, size]
-  );
 
   const handleFileChange = useCallback(
     async (e: SyntheticEvent) => {
@@ -84,16 +63,19 @@ const App = () => {
     const x = getX(canvas, e.clientX);
     const y = getY(canvas, e.clientY);
 
-    if (x && y && eraser.longPress) {
-      setIsProcessing(true);
+    if (x && y) {
       const eraser = new Eraser(x, y, {
         threshold,
         size,
         radius: size,
       });
-      await eraser.erase(canvas);
-      save();
-      setIsProcessing(false);
+
+      if (eraser.longPress) {
+        setIsProcessing(true);
+        await eraser.erase(canvas);
+        save();
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -146,7 +128,7 @@ const App = () => {
           <button onClick={undo}>Undo</button>
           <button onClick={redo}>Redo</button>
         </div>
-        {/* <div>
+        <div>
           <span>Size</span>
           <select value={size} onChange={(e) => setSize(+e.target.value)}>
             <option value="5">Small</option>
@@ -161,7 +143,7 @@ const App = () => {
             value={threshold}
             onChange={handleThresholdChange}
           />
-        </div> */}
+        </div>
         <button onClick={saveCanvasAsImage}>Save</button>
       </div>
       <main

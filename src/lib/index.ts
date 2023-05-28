@@ -1,6 +1,4 @@
 export * from "./is-color-match";
-export * from "./remove-connected-pixels";
-export * from "./display-image-on-canvas";
 export * from "./base-eraser";
 export * from "./box-eraser";
 export * from "./circle-eraser";

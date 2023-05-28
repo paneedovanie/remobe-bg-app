@@ -23,7 +23,7 @@ export abstract class BaseEraser {
     return this.options.radius ?? 10;
   }
 
-  erase(canvas: HTMLCanvasElement) {
-    //
+  erase(_: HTMLCanvasElement) {
+    console.log(_);
   }
 }
